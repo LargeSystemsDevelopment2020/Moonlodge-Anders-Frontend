@@ -12,15 +12,16 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.sql.Date;
 import java.util.List;
 
 
 @Component
-public class HotelManagerService implements HotelManagerInterface {
+public class HotelManagerService extends UnicastRemoteObject implements HotelManagerInterface {
 
 
-    private HotelManagerInterface hotelManagerService;
+    HotelManagerInterface hotelManagerService;
 
     @Autowired
     HotelManagerService(@Value("remoteEngine") String remoteEngine) throws RemoteException, NotBoundException, MalformedURLException {
