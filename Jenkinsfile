@@ -1,21 +1,64 @@
-// test
+def gv
+
 pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage("init") {
             steps {
-                echo 'Building..'
+                echo "init groovy script"
+                script {
+                    gv = load "script.groovy"
+                }
             }
         }
-        stage('Test') {
+        stage('build') {
             steps {
-                echo 'Testing..'
+                script {
+                    gv.buildProject()
+                }
+                sh "mvn clean install"
             }
         }
-        stage('Deploy') {
+        stage('unit test') {
             steps {
-                echo 'Deploying....'
+                script {
+                    gv.unitTest()
+                }
+                sh 'mvn clean test -P dev'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('integration test') {
+            steps {
+                script {
+                    gv.integrationTest()
+                }
+                sh 'mvn clean verify -P integration-test'
+            }
+        }
+    }
+    post {
+        // will be executed no matter what
+        always {
+            script {
+                gv.afterEachBuild()
+            }
+        }
+        // only relevant if buil fails
+        failure {
+            script {
+            gv.whenBuildFailed()
+            }
+        }
+        // only relevant if build succeded
+        success {
+            script {
+            gv.whenBuildSucceded()
             }
         }
     }
